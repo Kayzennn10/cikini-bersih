@@ -10,6 +10,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # Abaikan perintah build jika kamu pakai Next.js standalone
+ENV NEXT_TELEMETRY_DISABLED 1
+
 RUN npm run build
 
 # Tahap 3: Runner (Tahap final yang akan jalan di EC2)
