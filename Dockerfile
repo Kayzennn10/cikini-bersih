@@ -1,32 +1,33 @@
 # Tahap 1: Install dependencies
-FROM node:18-alpine AS deps
+# Ganti dari 18 ke 20
+FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
 # Tahap 2: Build aplikasi
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Abaikan perintah build jika kamu pakai Next.js standalone
-ENV NEXT_TELEMETRY_DISABLED 1
+
+# Gunakan tanda = agar tidak kena warning LegacyKeyValueFormat
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
 RUN npm run build
 
 # Tahap 3: Runner (Tahap final yang akan jalan di EC2)
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
-# Copy file yang dibutuhkan saja dari tahap builder
+# Copy file yang dibutuhkan
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
 
-
-# Jalankan aplikasi
 CMD ["node", "server.js"]
