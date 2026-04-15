@@ -1,65 +1,92 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import { motion } from "framer-motion";
+
+export default function LaporanSampah() {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    const formData = new FormData(e.currentTarget);
+    try {
+      const res = await fetch("/api/report", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        alert("Laporan berhasil dikirim! 🌱");
+        (e.target as HTMLFormElement).reset();
+      } else {
+        const errorData = await res.json();
+        alert("Gagal: " + errorData.error);
+      }
+    } catch (err) {
+      alert("Gagal menyambung ke server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-green-50 flex items-center justify-center p-6">
+      <motion.div 
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-green-100"
+      >
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-green-800">Cikini Bersih</h1>
+          <p className="text-green-600/70 text-sm">Laporkan tumpukan sampah untuk lingkungan yang asri.</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-green-700 mb-2">Lokasi / Judul</label>
+            <input 
+              name="title" 
+              required
+              className="w-full px-4 py-3 rounded-xl border border-green-100 text-gray-900 focus:ring-2 focus:ring-green-500 outline-none bg-white transition-all"
+              placeholder="Contoh: Sampah depan Cluster"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-green-700 mb-2">Keterangan</label>
+            <textarea 
+              name="description" 
+              rows={3}
+              className="w-full px-4 py-3 rounded-xl border border-green-100 text-gray-900 focus:ring-2 focus:ring-green-500 outline-none bg-white transition-all"
+              placeholder="Ceritakan detail lokasinya..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-green-700 mb-2">Foto Sampah</label>
+            <div className="border-2 border-dashed border-green-200 rounded-xl p-4 text-center bg-green-50/20">
+              <input 
+                type="file" 
+                name="file" 
+                accept="image/*" 
+                required
+                className="w-full text-sm text-green-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-700"
+              />
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-95 disabled:opacity-50"
           >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            {loading ? "Mengirim..." : "Kirim Laporan 🌱"}
+          </button>
+        </form>
+      </motion.div>
+    </main>
   );
 }
